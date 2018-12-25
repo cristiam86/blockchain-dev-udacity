@@ -41,7 +41,16 @@ Usage:
 ```sh
 curl http://localhost:8000/block/:height
 ```
-If there is no block for the given height, an error is returned.
+If there is no such block for the given height, an error is returned. If the block exists, the response should look like the following:
+```json
+{
+    "hash": "c19b753dcb86edd39c16e0f505e3cdf584c0e7bdad31e1e3a621b22e57dad63c",
+    "height": 0,
+    "body": "First block in the chain - Genesis block",
+    "time": "1545765723",
+    "previousBlockHash": ""
+}
+```
 
 ### ADD Block
 Adds a block to the chain with the given data.
@@ -50,7 +59,16 @@ Usage:
 ```sh
  curl -X POST http://localhost:8000/block -d '{"body":"test data"}' -H "Content-Type: application/json"
 ```
-If no data is sent, an error is returnet as **"invalid data"**
+If no data is sent, an error is returnet as **"invalid data"**. If the block is added to the chain, the response should look like the following:
+```json
+{
+    "hash": "be1ff37dc8307fffd4d67dfa6b372936cd432fc64cb009e30fedadbd6bcd0dfc",
+    "height": 1,
+    "body": "block 1",
+    "time": "1545765739",
+    "previousBlockHash": "c19b753dcb86edd39c16e0f505e3cdf584c0e7bdad31e1e3a621b22e57dad63c"
+}
+```
 
 ## Built With
 
