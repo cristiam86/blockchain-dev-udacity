@@ -7,9 +7,10 @@ const Block = require('./Block.js');
 
 let myBlockChain = new BlockChain.Blockchain();
 
-setTimeout(function () {
-	console.log("Waiting...")
-}, 10000);
+
+// setTimeout(function () {
+// 	console.log("Waiting...")
+// }, 10000);
 
 /******************************************
  ** Function for Create Tests Blocks   ****
@@ -49,7 +50,7 @@ setTimeout(function () {
 
 
 // Be careful this only will work if `getBlock` method in Blockchain.js file return a Promise
-// myBlockChain.getBlock(9).then((block) => {
+// myBlockChain.getBlock(1).then((block) => {
 // 	console.log(JSON.stringify(block));
 // }).catch((err) => { console.log(err);});
 
@@ -60,7 +61,7 @@ setTimeout(function () {
 
 
 // Be careful this only will work if `validateBlock` method in Blockchain.js file return a Promise
-// myBlockChain.validateBlock(1).then((valid) => {
+// myBlockChain.validateBlock(7).then((valid) => {
 // 	console.log("Validate Block: ", valid);
 // })
 // .catch((error) => {
@@ -70,9 +71,9 @@ setTimeout(function () {
 
 /** Tampering a Block this is only for the purpose of testing the validation methods */
 
-// myBlockChain.getBlock(5).then((block) => {
+// myBlockChain.getBlock(10).then((block) => {
 // 	let blockAux = block;
-// 	blockAux.body = "Tampered Block";
+// 	blockAux.body = "Tampered Block 10";
 // 	myBlockChain._modifyBlock(blockAux.height, blockAux).then((blockModified) => {
 // 		if(blockModified){
 // 			myBlockChain.validateBlock(blockAux.height).then((valid) => {

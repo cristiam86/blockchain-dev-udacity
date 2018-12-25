@@ -27,7 +27,6 @@ class LevelSandbox {
     // Add data to levelDB with key and value (Promise)
     addLevelDBData(key, value) {
         return new Promise((resolve, reject) => {
-            console.log("​LevelSandbox -> addLevelDBData -> key", key, typeof key)
             this.db.put(key, value, function(err) {
                 if (err) {
                     reject('Block ' + key + ' submission failed', err)

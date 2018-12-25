@@ -19,9 +19,9 @@ class Blockchain {
     // will not create the genesis block
     generateGenesisBlock(){
         this.getBlockHeight().then(res => {
-            if (res == 0) {
+            if (res < 0) {
                 const newBlock = new Block.Block("First block in the chain - Genesis block");
-                newBlock.height = res;
+                newBlock.height = 0;
                 newBlock.time = new Date().getTime().toString().slice(0,-3);
                 newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
                 this.saveBlockToDB(newBlock).then(genesisBlock => {
@@ -35,24 +35,20 @@ class Blockchain {
 
     // Get block height, it is auxiliar method that return the height of the blockchain
     getBlockHeight() {
-        return this.db.getBlocksCount();
+        return new Promise((resolve, reject) => {
+            this.getLatestBlock().then(lastBlock => {
+                resolve(lastBlock ? lastBlock.height : -1);
+            })
+        });
     }
 
     getLatestBlock(){
         return new Promise((resolve, reject) => {
-            this.getBlockHeight().then(height => {
-                if (height == 0) {
-                    resolve(null);
-                } else {
-                    this.getBlock(height-1).then(block => {
-                        resolve(block);
-                    }).catch(err => {
-						console.log("​getLatestBlock -> getBlockHeight -> getBlock -> err", err)
-                    })
-                }
-                
+            this.getChain().then(chain => {
+                const latestBlock = chain.pop();
+                resolve(latestBlock);
             })
-        })
+        });
     }
 
     // Add new block
@@ -60,7 +56,7 @@ class Blockchain {
         // Block height
         return new Promise((resolve, reject) => {
             this.getBlockHeight().then(res => {
-                newBlock.height = res;
+                newBlock.height = res+1;
                 newBlock.time = new Date().getTime().toString().slice(0,-3);
     
                 // previous block hash
@@ -126,14 +122,8 @@ class Blockchain {
                 const errors = [];
                 const promises = [];
 
-                const parsedChain = chain
-                    .sort((a,b) => parseInt(a.key) - parseInt(b.key))
-                    .map((block) => JSON.parse(block.value));
-
-                for(let i=0 ; i<parsedChain.length - 1 ; i++) {
-                    const currentBlock = { ...parsedChain[i] };
-                    const nextBlock = parsedChain[i + 1];
-
+                for(let i=0 ; i<chain.length ; i++) {
+                    const currentBlock = { ...chain[i] };
                     const newPromise = new Promise((resolve, reject) => {
                         this.validateBlock(i).then((valid) => {
                             if(!valid) {
@@ -143,10 +133,14 @@ class Blockchain {
                         });
                     });
                     promises.push(newPromise);
-                    currentBlock.hash = "";
-                    const currentBlockHash = SHA256(JSON.stringify(currentBlock)).toString();
-                    if (currentBlockHash !== nextBlock.previousBlockHash) {
-                        errors.push(`The previous hash of the block with height ${i+1} does not match with the hash of the block ${i}`);
+
+                    if(i < chain.length - 1) {
+                        const nextBlock = chain[i + 1];
+                        currentBlock.hash = "";
+                        const currentBlockHash = SHA256(JSON.stringify(currentBlock)).toString();
+                        if (currentBlockHash !== nextBlock.previousBlockHash) {
+                            errors.push(`The previous hash of the block with height ${i+1} does not match with the hash of the block ${i}`);
+                        }
                     }
                 }
 				Promise.all(promises).then(() => { 
@@ -159,8 +153,12 @@ class Blockchain {
 
     getChain(){
         return new Promise((resolve, reject) => {
-            this.db.getAll().then(blocks => {
-                resolve(blocks);
+            this.db.getAll().then(chain => {
+                const parsedChain = chain
+                    .sort((a,b) => parseInt(a.key) - parseInt(b.key))
+                    .map((block) => JSON.parse(block.value));
+
+                resolve(parsedChain);
             })
         })
     }
